@@ -20,7 +20,7 @@ export default function App() {
   const [weather, setWeather] = React.useState(null);
   const [data, setData] = React.useState(null);
 
-  const scrollX = React.useRef(new Animated.Value(0)).current;
+  const scrollX = new Animated.Value(0);
 
   const width = Dimensions.get('window').width;
   const height = Dimensions.get('window').height;
@@ -88,6 +88,15 @@ export default function App() {
           <Text style={[styles.titleHeader, { fontFamily: 'Nunito-Regular' }]}>{weather?.location.name}, {weather?.location.region}</Text>
           <Text style={[styles.subtitleHeader, { fontFamily: 'Nunito-Regular' }]}>{weather?.location.country}</Text>
         </View>
+        <View style={[styles.main, { width: width, height: height / 2 }]}>
+          <Text style={[styles.subtitleMain, { fontFamily: 'Nunito-Regular' }]}>{moment().format('LT')}</Text>
+          <Text style={[styles.titleMain, { fontFamily: 'Nunito-Bold' }]}>{parseInt(weather?.current.temp_c)}°C</Text>
+          <Text style={[styles.subtitleMain, { fontFamily: 'Nunito-Regular' }]}>{weather?.current.condition.text}</Text>
+          <View style={styles.wind}>
+            <Fontisto name="wind" size={22} color="#01497c" />
+            <Text style={[styles.textWind, { fontFamily: 'Nunito-Regular' }]}>{parseInt(weather?.current.wind_kph)}m/s</Text>
+          </View>
+        </View>
         <Animated.ScrollView
           horizontal
           pagingEnabled
@@ -97,29 +106,16 @@ export default function App() {
               [{ nativeEvent: { contentOffset: { x: scrollX } } }],
               { useNativeDriver: false })
           }}
-          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}
           scrollEventThrottle={30}
+          contentContainerStyle={{flexGrow: 1}}
         >
           {
-            data?.sort((a, b) => {
-              if (moment(a.time).get('hour') === moment().get('hour')) {
-                return -1;
-              }
-              if (moment(b.time).get('hour') === moment().get('hour')) {
-                return 1;
-              }
-            }).filter((item, index) => {
-              return moment(item.time).get('hour') >= moment().get('hour');
-            }).map((item, index) => {
+            data?.map((item, index) => {
               return (
-                <View key={index} style={[styles.main, { width: width, height: height }]}>
-                  <Text style={[styles.subtitleMain, { fontFamily: 'Nunito-Regular' }]}>{moment(item.time).format('LT')}</Text>
-                  <Text style={[styles.titleMain, { fontFamily: 'Nunito-Bold' }]}>{parseInt(item.temp_c)}°C</Text>
-                  <Text style={[styles.subtitleMain, { fontFamily: 'Nunito-Regular' }]}>{item.condition.text}</Text>
-                  <View style={styles.wind}>
-                    <Fontisto name="wind" size={22} color="#588157" />
-                    <Text style={[styles.textWind, { fontFamily: 'Nunito-Regular' }]}>{parseInt(item.wind_kph)}m/s</Text>
-                  </View>
+                <View key={index} style={[styles.block, { width: width / 5, height: height / 2 }]}>
+                  <Text style={[styles.subtitleBlock, { fontFamily: 'Nunito-Regular' }]}>{moment(item.time).format('LT')}</Text>
+                  <Text style={[styles.titleBlock, { fontFamily: 'Nunito-Bold' }]}>{parseInt(item.temp_c)}°C</Text>
+                  <Text style={[styles.subtitleBlock, { fontFamily: 'Nunito-Regular' }]}>{item.condition.text}</Text>
                 </View>
               )
             })
@@ -146,22 +142,22 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#dad7cd',
+    backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingVertical: 20,
     width: '100%',
+    justifyContent: 'space-around',
   },
   header: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   titleHeader: {
-    color: '#588157',
+    color: '#01497c',
     fontSize: RFValue(14),
   },
   subtitleHeader: {
-    color: '#588157',
+    color: '#01497c',
     fontSize: RFValue(12),
   },
   main: {
@@ -169,11 +165,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   titleMain: {
-    color: '#344e41',
+    color: '#012a4a',
     fontSize: RFValue(100),
   },
   subtitleMain: {
-    color: '#588157',
+    color: '#01497c',
     fontSize: RFValue(14),
   },
   wind: {
@@ -183,7 +179,7 @@ const styles = StyleSheet.create({
     marginTop: 25,
   },
   textWind: {
-    color: '#588157',
+    color: '#01497c',
     fontSize: RFValue(15),
     marginLeft: 5,
   },
@@ -201,7 +197,21 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   itemText: {
-    color: '#344e41',
+    color: '#012a4a',
     fontSize: RFValue(12),
+  },
+  block: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 10,
+  },
+  titleBlock: {
+    color: '#012a4a',
+    fontSize: RFValue(22),
+  },
+  subtitleBlock: {
+    color: '#01497c',
+    fontSize: RFValue(8),
+    textAlign: 'center',
   },
 });
