@@ -2,7 +2,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet, Text, View, Animated, Dimensions } from 'react-native';
 import ToastManager, { Toast } from 'toastify-react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
-import { Fontisto } from '@expo/vector-icons';
+import { Fontisto, Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import *  as Location from 'expo-location';
 import { useFonts } from 'expo-font';
@@ -29,6 +29,7 @@ export default function App() {
   const [loaded] = useFonts({
     'Nunito-Regular': require('./assets/fonts/Nunito/static/Nunito-Regular.ttf'),
     'Nunito-Bold': require('./assets/fonts/Nunito/static/Nunito-Bold.ttf'),
+    'Nunito-Black': require('./assets/fonts/Nunito/static/Nunito-Black.ttf'),
   });
 
   // GET WEATHER
@@ -92,14 +93,25 @@ export default function App() {
           <Text style={[styles.subtitleMain, { fontFamily: 'Nunito-Regular' }]}>{moment().format('LT')}</Text>
           <Text style={[styles.titleMain, { fontFamily: 'Nunito-Bold' }]}>{parseInt(weather?.current.temp_c)}°C</Text>
           <Text style={[styles.subtitleMain, { fontFamily: 'Nunito-Regular' }]}>{weather?.current.condition.text}</Text>
-          <View style={styles.wind}>
+          <View style={styles.subInfo}>
+            <View style={{flexDirection: 'row', marginHorizontal: 10, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+            <Ionicons name="ios-water-outline" size={22} color="#01497c" />
+            <Text style={[styles.label, { fontFamily: 'Nunito-Regular' }]}>{parseInt(weather?.current.humidity)}%</Text>
+            </View>
+            <View style={{flexDirection: 'row', marginHorizontal: 10, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
             <Fontisto name="wind" size={22} color="#01497c" />
-            <Text style={[styles.textWind, { fontFamily: 'Nunito-Regular' }]}>{parseInt(weather?.current.wind_kph)}m/s</Text>
+            <Text style={[styles.label, { fontFamily: 'Nunito-Regular' }]}>{parseInt(weather?.current.wind_kph)}m/s</Text>
+            </View>
+            <View style={{flexDirection: 'row', marginHorizontal: 10, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+            <Fontisto name="day-sunny" size={22} color="#01497c" />
+            <Text style={[styles.label, { fontFamily: 'Nunito-Regular' }]}>{parseInt(weather?.current.uv)}</Text>
+            </View>
           </View>
         </View>
+        <View style={{ width: width, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={[{ fontFamily: 'Nunito-Black', color: '#012a4a', textTransform: 'uppercase', fontSize: RFValue(15), marginVertical: 5 }]}>Temperaturas do dia</Text>
         <Animated.ScrollView
           horizontal
-          pagingEnabled
           showsHorizontalScrollIndicator={false}
           onScroll={() => {
             Animated.event(
@@ -107,12 +119,11 @@ export default function App() {
               { useNativeDriver: false })
           }}
           scrollEventThrottle={30}
-          contentContainerStyle={{flexGrow: 1}}
         >
           {
             data?.map((item, index) => {
               return (
-                <View key={index} style={[styles.block, { width: width / 5, height: height / 2 }]}>
+                <View key={index} style={[styles.block, { width: width / 5.5, height: 90}]}>
                   <Text style={[styles.subtitleBlock, { fontFamily: 'Nunito-Regular' }]}>{moment(item.time).format('LT')}</Text>
                   <Text style={[styles.titleBlock, { fontFamily: 'Nunito-Bold' }]}>{parseInt(item.temp_c)}°C</Text>
                   <Text style={[styles.subtitleBlock, { fontFamily: 'Nunito-Regular' }]}>{item.condition.text}</Text>
@@ -121,6 +132,7 @@ export default function App() {
             })
           }
         </Animated.ScrollView>
+        </View>
         <View style={styles.footer}>
           {
             forecast?.forecast.forecastday.map((item, index) => {
@@ -172,13 +184,13 @@ const styles = StyleSheet.create({
     color: '#01497c',
     fontSize: RFValue(14),
   },
-  wind: {
+  subInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 25,
   },
-  textWind: {
+  label: {
     color: '#01497c',
     fontSize: RFValue(15),
     marginLeft: 5,
@@ -204,13 +216,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: '#012a4a',
   },
   titleBlock: {
-    color: '#012a4a',
-    fontSize: RFValue(22),
+    color: '#fff',
+    fontSize: RFValue(18),
   },
   subtitleBlock: {
-    color: '#01497c',
+    color: '#fff',
     fontSize: RFValue(8),
     textAlign: 'center',
   },
