@@ -1,7 +1,7 @@
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, Text, View, Animated, Dimensions } from 'react-native';
 import ToastManager, { Toast } from 'toastify-react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
-import { StyleSheet, Text, View } from 'react-native';
 import { Fontisto } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import *  as Location from 'expo-location';
@@ -18,6 +18,12 @@ export default function App() {
   const [location, setLocation] = React.useState(null);
   const [forecast, setForecast] = React.useState(null);
   const [weather, setWeather] = React.useState(null);
+  const [data, setData] = React.useState(null);
+
+  const scrollX = React.useRef(new Animated.Value(0)).current;
+
+  const width = Dimensions.get('window').width;
+  const height = Dimensions.get('window').height;
 
   // FONTS
   const [loaded] = useFonts({
@@ -41,6 +47,7 @@ export default function App() {
     api.get(`forecast.json?key=fd49c88d2894495684f122240232303&q=${location.coords.latitude},${location.coords.longitude}&days=3&aqi=no&alerts=no&lang=pt`)
       .then((response) => {
         setForecast(response.data);
+        setData(response.data.forecast.forecastday[0].hour);
       })
       .catch((error) => {
         Toast.error(error.response.data.message);
@@ -81,14 +88,43 @@ export default function App() {
           <Text style={[styles.titleHeader, { fontFamily: 'Nunito-Regular' }]}>{weather?.location.name}, {weather?.location.region}</Text>
           <Text style={[styles.subtitleHeader, { fontFamily: 'Nunito-Regular' }]}>{weather?.location.country}</Text>
         </View>
-        <View style={styles.main}>
-          <Text style={[styles.titleMain, { fontFamily: 'Nunito-Bold' }]}>{parseInt(weather?.current.temp_c)}°C</Text>
-          <Text style={[styles.subtitleMain, { fontFamily: 'Nunito-Regular' }]}>{weather?.current.condition.text}</Text>
-          <View style={styles.wind}>
-            <Fontisto name="wind" size={22} color="#588157" />
-            <Text style={[styles.textWind, { fontFamily: 'Nunito-Regular' }]}>{weather?.current.wind_kph}m/s</Text>
-          </View>
-        </View>
+        <Animated.ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={() => {
+            Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: false })
+          }}
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}
+          scrollEventThrottle={30}
+        >
+          {
+            data?.sort((a, b) => {
+              if (moment(a.time).get('hour') === moment().get('hour')) {
+                return -1;
+              }
+              if (moment(b.time).get('hour') === moment().get('hour')) {
+                return 1;
+              }
+            }).filter((item, index) => {
+              return moment(item.time).get('hour') >= moment().get('hour');
+            }).map((item, index) => {
+              return (
+                <View key={index} style={[styles.main, { width: width, height: height }]}>
+                  <Text style={[styles.subtitleMain, { fontFamily: 'Nunito-Regular' }]}>{moment(item.time).format('LT')}</Text>
+                  <Text style={[styles.titleMain, { fontFamily: 'Nunito-Bold' }]}>{parseInt(item.temp_c)}°C</Text>
+                  <Text style={[styles.subtitleMain, { fontFamily: 'Nunito-Regular' }]}>{item.condition.text}</Text>
+                  <View style={styles.wind}>
+                    <Fontisto name="wind" size={22} color="#588157" />
+                    <Text style={[styles.textWind, { fontFamily: 'Nunito-Regular' }]}>{parseInt(item.wind_kph)}m/s</Text>
+                  </View>
+                </View>
+              )
+            })
+          }
+        </Animated.ScrollView>
         <View style={styles.footer}>
           {
             forecast?.forecast.forecastday.map((item, index) => {
@@ -114,6 +150,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 20,
+    width: '100%',
   },
   header: {
     alignItems: 'center',
@@ -129,7 +166,7 @@ const styles = StyleSheet.create({
   },
   main: {
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   titleMain: {
     color: '#344e41',
