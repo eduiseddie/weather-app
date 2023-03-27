@@ -68,9 +68,11 @@ export default function App() {
 
   const theme = isDarkTheme ? CustomDarkTheme : CustomDefaultTheme;
 
+  const your_key = 'your_key';
+
   // GET WEATHER
   const getWeather = async () => {
-    api.get(`current.json?key=fd49c88d2894495684f122240232303&q=${location.coords.latitude},${location.coords.longitude}&aqi=no&lang=pt`)
+    api.get(`current.json?key=${your_key}&q=${location.coords.latitude},${location.coords.longitude}&aqi=no&lang=pt`)
       .then((response) => {
         setWeather(response.data);
       })
@@ -84,7 +86,7 @@ export default function App() {
 
   // GET FORECAST
   const getForecast = async () => {
-    api.get(`forecast.json?key=fd49c88d2894495684f122240232303&q=${location.coords.latitude},${location.coords.longitude}&days=3&aqi=no&alerts=no&lang=pt`)
+    api.get(`forecast.json?key=${your_key}&q=${location.coords.latitude},${location.coords.longitude}&days=3&aqi=no&alerts=no&lang=pt`)
       .then((response) => {
         setForecast(response.data);
         setData(response.data.forecast.forecastday[0].hour);
